@@ -1,11 +1,11 @@
-var a = 1;
-{
-  var a = a + 2;
-  print a;
-}
-print a+2;
-var b = "It's a beautiful day!";
-//var b = nil;
-a = "Hello world! " + b;
+var a = 2;
+var b = 3;
 
-print a;
+var op = "sum";
+
+if (op == "sum")
+  print a + b;
+else if (op == "product")
+  print a * b;
+else
+  print "Operation not defined!";
