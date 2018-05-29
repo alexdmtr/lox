@@ -1,3 +1,5 @@
-print "one";
-print true;
-print 2 + 1;
+var a = "one";
+var b = "two";
+var c = "three";
+var d = a + "," + b + "," + c;
+print d;

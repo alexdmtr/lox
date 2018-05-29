@@ -5,6 +5,8 @@ import java.util.List;
 
 // This class is modified so that statements *do* return values
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
+  private Environment environment = new Environment();
+
   List<Object> interpret(List<Stmt> statements) {
     List<Object> results = new ArrayList<>();
     try {
@@ -40,6 +42,11 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
 
     // Unreachable.
     return null;
+  }
+
+  @Override
+  public Object visitVariableExpr(Expr.Variable expr) {
+    return environment.get(expr.name);
   }
 
   private void checkNumberOperand(Token operator, Object operand) {
@@ -156,5 +163,16 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     Object value = evaluate(stmt.expression);
     System.out.println(stringify(value));
     return value;
+  }
+
+  @Override
+  public Void visitVarStmt(Stmt.Var stmt) {
+    Object value = null;
+    if (stmt.initializer != null) {
+      value = evaluate(stmt.initializer);
+    }
+
+    environment.define(stmt.name.lexeme, value);
+    return null;
   }
 }
