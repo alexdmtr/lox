@@ -1,11 +1,12 @@
 var a = 2;
-var b = 3;
+var b = 1;
+var c = 3;
 
-var op = "sum";
-
-if (op == "sum")
-  print a + b;
-else if (op == "product")
-  print a * b;
+if (a < b and a < c)
+  print a;
+else if (b < a and b < c)
+  print b;
 else
-  print "Operation not defined!";
+  print c;
+
+print nil or "hey!";
