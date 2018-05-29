@@ -3,3 +3,6 @@ var b = "two";
 var c = "three";
 var d = a + "," + b + "," + c;
 print d;
+
+a = 13;
+print(a+5);
