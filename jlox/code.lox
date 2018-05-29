@@ -1,12 +1,25 @@
-var a = 2;
-var b = 1;
-var c = 3;
+// Prints all the prime numbers up to N.
 
-if (a < b and a < c)
-  print a;
-else if (b < a and b < c)
-  print b;
-else
-  print c;
+var N = 15;
+var num = 2;
 
-print nil or "hey!";
+while (num <= N)
+{
+    var prime = true;
+    if (num % 2 == 0 and num != 2)
+        prime = false;
+    else
+    {
+        var d = 3;
+        while (d * d <= num and prime)
+        {
+            if (num % d == 0)
+                prime = false;
+            d = d + 2;
+        }
+    }
+
+    if (prime)
+        print num;
+    num = num + 1;
+}

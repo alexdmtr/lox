@@ -114,6 +114,9 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
       case STAR:
         checkNumberOperands(expr.operator, left, right);
         return (double)left * (double)right;
+      case PERCENT:
+        checkNumberOperands(expr.operator, left, right);
+        return (double)left % (double)right;
       case PLUS:
         if (left instanceof Double && right instanceof Double) {
           return (double)left + (double)right;
@@ -218,6 +221,14 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
       environment.define(stmt.name, value);
     } else {
       environment.define(stmt.name);
+    }
+    return null;
+  }
+
+  @Override
+  public Void visitWhileStmt(Stmt.While stmt) {
+    while (isTruthy(evaluate(stmt.condition))) {
+      execute(stmt.body);
     }
     return null;
   }
