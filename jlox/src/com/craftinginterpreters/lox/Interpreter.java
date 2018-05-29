@@ -23,6 +23,25 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     return stmt.accept(this);
   }
 
+  void executeBlock(List<Stmt> statements, Environment environment) {
+    Environment previous = this.environment;
+    try {
+      this.environment = environment;
+
+      for (Stmt statement : statements) {
+        execute(statement);
+      }
+    } finally {
+      this.environment = previous;
+    }
+  }
+
+  @Override
+  public Void visitBlockStmt(Stmt.Block stmt) {
+    executeBlock(stmt.statements, new Environment(environment));
+    return null;
+  }
+
   @Override
   public Object visitLiteralExpr(Expr.Literal expr) {
     return expr.value;
@@ -103,6 +122,9 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
         return compare(expr, left, right) <= 0;
       case BANG_EQUAL: return !isEqual(left, right);
       case EQUAL_EQUAL: return isEqual(left, right);
+
+      // To do: make this an enumeration?
+      case COMMA: return right;
     }
 
     // Unreachable.
@@ -170,9 +192,10 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     Object value = null;
     if (stmt.initializer != null) {
       value = evaluate(stmt.initializer);
+      environment.define(stmt.name, value);
+    } else {
+      environment.define(stmt.name);
     }
-
-    environment.define(stmt.name.lexeme, value);
     return null;
   }
 
