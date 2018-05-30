@@ -22,9 +22,9 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
       }
     });
 
-    globals.define("readDouble", new LoxCallable() {
-      java.util.Scanner scanner = new java.util.Scanner(System.in);
+    java.util.Scanner scanner = new java.util.Scanner(System.in);
 
+    globals.define("readDouble", new LoxCallable() {
       @Override
       public int arity() {
         return 0;
@@ -39,7 +39,6 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     });
 
     globals.define("readInt", new LoxCallable() {
-      java.util.Scanner scanner = new java.util.Scanner(System.in);
 
       @Override
       public int arity() {
@@ -49,6 +48,21 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
       @Override
       public Object call(Interpreter interpreter, List<Object> arguments) {
         double value = scanner.nextInt();
+
+        return value;
+      }
+    });
+
+    globals.define("readLine", new LoxCallable() {
+
+      @Override
+      public int arity() {
+        return 0;
+      }
+
+      @Override
+      public Object call(Interpreter interpreter, List<Object> arguments) {
+        String value = scanner.nextLine();
 
         return value;
       }
@@ -144,6 +158,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
   private boolean isTruthy(Object object) {
     if (object == null) return false;
     if (object instanceof Boolean) return (boolean)object;
+    if (object instanceof Double) return (double)object != 0;
     return true;
   }
 
@@ -267,6 +282,13 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
   public Object visitExpressionStmt(Stmt.Expression stmt) {
     Object value = evaluate(stmt.expression);
     return value;
+  }
+
+  @Override
+  public Void visitFunctionStmt(Stmt.Function stmt) {
+    LoxFunction function = new LoxFunction(stmt);
+    environment.define(stmt.name.lexeme, function);
+    return null;
   }
 
   @Override
