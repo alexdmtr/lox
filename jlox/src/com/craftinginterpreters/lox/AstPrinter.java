@@ -1,6 +1,7 @@
 package com.craftinginterpreters.lox;
 
 // Creates an unambiguous, if ugly, string representation of AST nodes.
+@Deprecated
 class AstPrinter implements Expr.Visitor<String> {
   String print(Expr expr) {
     return expr.accept(this);
@@ -40,6 +41,11 @@ class AstPrinter implements Expr.Visitor<String> {
   @Override
   public String visitAssignExpr(Expr.Assign expr) {
     return parenthesize("= " + expr.name.lexeme, expr.value);
+  }
+
+  @Override
+  public String visitCallExpr(Expr.Call expr) {
+    return parenthesize(expr.callee.toString(), (Expr[])expr.arguments.toArray());
   }
 
   private String parenthesize(String name, Expr... exprs) {

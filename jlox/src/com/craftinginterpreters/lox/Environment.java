@@ -20,21 +20,21 @@ class Environment {
   }
 
   // Throw error if redefining scope variables.
-  private void assertNotDefined(Token name) {
-    if (values.containsKey(name.lexeme))
-      throw new RuntimeError(name, "Attempting to redefine scope variable '" + name.lexeme + "'.");
+  private void assertNotDefined(String name) {
+    if (values.containsKey(name))
+      throw new RuntimeError(null, "Attempting to redefine scope variable '" + name + "'.");
   }
 
   // Create a variable without assigning to it.
-  void define(Token name) {
+  void define(String name) {
     assertNotDefined(name);
-    values.put(name.lexeme, null);
+    values.put(name, null);
   }
 
-  void define(Token name, Object value) {
+  void define(String name, Object value) {
     assertNotDefined(name);
-    values.put(name.lexeme, value);
-    initializedVariables.add(name.lexeme);
+    values.put(name, value);
+    initializedVariables.add(name);
   }
 
   Object get(Token name) {

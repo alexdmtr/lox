@@ -1,25 +1,11 @@
-// Prints all the prime numbers up to N.
+var N = readInt();
+var sum = 0;
 
-var N = 15;
-var num = 2;
-
-while (num <= N)
+for (var i = 0; i < N; i = i+1)
 {
-    var prime = true;
-    if (num % 2 == 0 and num != 2)
-        prime = false;
-    else
-    {
-        var d = 3;
-        while (d * d <= num and prime)
-        {
-            if (num % d == 0)
-                prime = false;
-            d = d + 2;
-        }
-    }
+    var x = readInt();
 
-    if (prime)
-        print num;
-    num = num + 1;
+    sum = sum + x;
 }
+
+print "sum = " + sum;
