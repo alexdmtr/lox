@@ -279,6 +279,16 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
   }
 
   @Override
+  public Object visitBreakStmt(Stmt.Break stmt) {
+    throw new Break();
+  }
+
+  @Override
+  public Object visitContinueStmt(Stmt.Continue stmt) {
+    throw new Continue();
+  }
+
+  @Override
   public Object visitExpressionStmt(Stmt.Expression stmt) {
     Object value = evaluate(stmt.expression);
     return value;
@@ -331,7 +341,13 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
   @Override
   public Void visitWhileStmt(Stmt.While stmt) {
     while (isTruthy(evaluate(stmt.condition))) {
-      execute(stmt.body);
+      try {
+        execute(stmt.body);
+      } catch (Break breakException) {
+        break;
+      } catch (Continue continueException) {
+        continue;
+      }
     }
     return null;
   }

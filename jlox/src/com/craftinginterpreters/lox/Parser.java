@@ -103,9 +103,25 @@ class Parser {
     if (match(PRINT)) return printStatement();
     if (match(RETURN)) return returnStatement();
     if (match(WHILE)) return whileStatement();
+    if (match(BREAK)) return breakStatement();
+    if (match(CONTINUE)) return continueStatement();
     if (match(LEFT_BRACE)) return new Stmt.Block(block());
 
     return expressionStatement();
+  }
+
+  private Stmt breakStatement() {
+    Token keyword = previous();
+    consume(SEMICOLON, "Expect ';' after break statement.");
+
+    return new Stmt.Break(keyword);
+  }
+
+  private Stmt continueStatement() {
+    Token keyword = previous();
+    consume(SEMICOLON, "Expect ';' after continue statement.");
+
+    return new Stmt.Continue(keyword);
   }
 
   private Stmt returnStatement() {
