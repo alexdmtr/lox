@@ -6,6 +6,12 @@ import java.util.Map;
 import java.util.Set;
 
 class Environment {
+  static class RedefineVariableError extends RuntimeError {
+    RedefineVariableError(Token token, String message) {
+      super(token, message);
+    }
+  }
+
   final Environment enclosing;
   private final Map<String, Object> values = new HashMap<>();
   // Checks whether a variable has been previously assigned a value
@@ -22,7 +28,7 @@ class Environment {
   // Throw error if redefining scope variables.
   private void assertNotDefined(String name) {
     if (values.containsKey(name))
-      throw new RuntimeError(null, "Attempting to redefine scope variable '" + name + "'.");
+      throw new RedefineVariableError(null, "Attempting to redefine scope variable '" + name + "'.");
   }
 
   // Create a variable without assigning to it.

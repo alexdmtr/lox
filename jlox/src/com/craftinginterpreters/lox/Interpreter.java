@@ -329,12 +329,17 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
   @Override
   public Void visitVarStmt(Stmt.Var stmt) {
     Object value = null;
-    if (stmt.initializer != null) {
-      value = evaluate(stmt.initializer);
-      environment.define(stmt.name.lexeme, value);
-    } else {
-      environment.define(stmt.name.lexeme);
-    }
+    try {
+      if (stmt.initializer != null) {
+        value = evaluate(stmt.initializer);
+        environment.define(stmt.name.lexeme, value);
+      } else {
+        environment.define(stmt.name.lexeme);
+      }
+    } catch (Environment.RedefineVariableError variableError) {
+      throw new Environment.RedefineVariableError(stmt.name, variableError.getMessage());
+    } // Environment doesn't know the token we're redefining a variable at.
+      // So, we catch it here and throw an identical error, but with the token defined.
     return null;
   }
 
