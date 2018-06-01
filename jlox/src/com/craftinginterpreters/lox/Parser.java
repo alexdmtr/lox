@@ -40,7 +40,8 @@ class Parser {
 
   private Stmt declaration() {
     try {
-      if (match(FUN)) return function("function");
+      // Disabled, so all function declarations are now expressions.
+//      if (match(FUN)) return function("function");
       if (match(VAR)) return varDeclaration();
 
       return statement();
@@ -218,7 +219,8 @@ class Parser {
 
   private Stmt expressionStatement() {
     Expr expr = expression();
-    consume(SEMICOLON, "Expect ';' after expression.");
+    if (!(expr instanceof Expr.Function)) // Relax ; rule for function declarations.
+      consume(SEMICOLON, "Expect ';' after expression.");
     return new Stmt.Expression(expr);
   }
 
@@ -353,6 +355,32 @@ class Parser {
     if (match(FALSE)) return new Expr.Literal(false);
     if (match(TRUE)) return new Expr.Literal(true);
     if (match(NIL)) return new Expr.Literal(null);
+    if (match(FUN)) {
+      String kind = "anonymous function";
+      Token name = null;
+      if (check(IDENTIFIER)) {
+        kind = "function";
+        name = consume(IDENTIFIER, "Expect function name");
+      }
+      consume(LEFT_PAREN, "Expect '(' after " + kind + " declaration.");
+
+      List<Token> parameters = new ArrayList<>();
+      if (!check(RIGHT_PAREN)) {
+        do {
+          if (parameters.size() >= 8) {
+            error(peek(), "Cannot have more than 8 parameters.");
+          }
+
+          parameters.add(consume(IDENTIFIER, "Expect parameter name."));
+        } while (match(COMMA));
+      }
+      consume(RIGHT_PAREN, "Expect ')' after parameters.");
+
+      consume(LEFT_BRACE, "Expect '{' before " + kind + " function body.");
+      List<Stmt> body = block();
+      return new Expr.Function(name != null ? LoxFunction.Kind.NAMED : LoxFunction.Kind.ANONYMOUS, name, parameters, body);
+
+    }
 
     if (match(NUMBER, STRING)) {
       return new Expr.Literal(previous().literal);

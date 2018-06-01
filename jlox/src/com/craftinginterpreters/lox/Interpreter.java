@@ -105,6 +105,21 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
   }
 
   @Override
+  public Object visitFunctionExpr(Expr.Function expr) {
+    LoxFunction function = new LoxFunction(expr, environment);
+    if (function.kind == LoxFunction.Kind.NAMED) {
+      try {
+      environment.define(expr.name.lexeme, function);
+    } catch (Environment.RedefineVariableError variableError) {
+      throw new Environment.RedefineVariableError(expr.name, variableError.getMessage());
+    } // Environment doesn't know the token we're redefining a variable at.
+    // So, we catch it here and throw an identical error, but with the token defined.
+    }
+
+    return function;
+  }
+
+  @Override
   public Object visitLiteralExpr(Expr.Literal expr) {
     return expr.value;
   }
