@@ -1,13 +1,23 @@
 package com.craftinginterpreters.lox;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
   private final Interpreter interpreter;
   private final Stack<Map<String, Boolean>> scopes = new Stack<>();
+
+
+  private enum FunctionType {
+    NONE,
+    FUNCTION
+  }
+  private FunctionType currentFunction = FunctionType.NONE;
+
+  private enum LoopType {
+    NONE,
+    WHILE
+  }
+  private LoopType currentLoop = LoopType.NONE;
 
   Resolver(Interpreter interpreter) {
     this.interpreter = interpreter;
@@ -23,11 +33,15 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
   @Override
   public Void visitBreakStmt(Stmt.Break stmt) {
+    if (currentLoop == LoopType.NONE)
+      Lox.error(stmt.name, "Cannot break from outside a loop.");
     return null;
   }
 
   @Override
   public Void visitContinueStmt(Stmt.Continue stmt) {
+    if (currentLoop == LoopType.NONE)
+      Lox.error(stmt.name, "Cannot continue from outside a loop.");
     return null;
   }
 
@@ -42,7 +56,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     declare(stmt.name);
     define(stmt.name);
 
-    resolveFunction(stmt);
+    resolveFunction(stmt, FunctionType.FUNCTION);
     return null;
   }
 
@@ -62,6 +76,10 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
   @Override
   public Void visitReturnStmt(Stmt.Return stmt) {
+    if (currentFunction == FunctionType.NONE) {
+      Lox.error(stmt.keyword, "Cannot return from top-level code.");
+    }
+
     if (stmt.value != null) {
       resolve(stmt.value);
     }
@@ -82,7 +100,13 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
   @Override
   public Void visitWhileStmt(Stmt.While stmt) {
     resolve(stmt.condition);
+
+    LoopType enclosingLoop = currentLoop;
+    currentLoop = LoopType.WHILE;
+
     resolve(stmt.body);
+
+    currentLoop = enclosingLoop;
     return null;
   }
 
@@ -118,7 +142,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
       define(expr.name);
     }
 
-    resolveFunction(expr);
+    resolveFunction(expr, FunctionType.FUNCTION);
     return null;
   }
 
@@ -173,25 +197,32 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     expr.accept(this);
   }
 
-  private void resolveFunction(Stmt.Function function) {
+  private void resolveFunction(Object function, FunctionType type) {
+    FunctionType enclosingFunction = currentFunction;
+    currentFunction = type;
+    List<Token> parameters;
+    List<Stmt> body;
+
+    if (function instanceof Stmt.Function) {
+      parameters = ((Stmt.Function) function).parameters;
+      body = ((Stmt.Function) function).body;
+    } else if (function instanceof Expr.Function) {
+      parameters = ((Expr.Function) function).parameters;
+      body = ((Expr.Function) function).body;
+    } else {
+      parameters = new ArrayList<>();
+      body = new ArrayList<>();
+    }
+
     beginScope();
-    for (Token param : function.parameters) {
+    for (Token param : parameters) {
       declare(param);
       define(param);
     }
-    resolve(function.body);
+    resolve(body);
     endScope();
-  }
 
-
-  private void resolveFunction(Expr.Function function) {
-    beginScope();
-    for (Token param : function.parameters) {
-      declare(param);
-      define(param);
-    }
-    resolve(function.body);
-    endScope();
+    currentFunction = enclosingFunction;
   }
 
   private void beginScope() {
@@ -206,6 +237,10 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     if (scopes.isEmpty()) return;
 
     Map<String, Boolean> scope = scopes.peek();
+    if (scope.containsKey(name.lexeme)) {
+      Lox.error(name,
+          "Variable with this name already declared in this scope.");
+    }
     scope.put(name.lexeme, false); // false - not ready yet
   }
 

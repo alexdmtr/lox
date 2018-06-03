@@ -26,6 +26,7 @@ class Environment {
   }
 
   // Throw error if redefining scope variables.
+  @Deprecated
   private void assertNotDefined(String name) {
     if (values.containsKey(name))
       throw new RedefineVariableError(null, "Attempting to redefine scope variable '" + name + "'.");
@@ -37,10 +38,28 @@ class Environment {
     values.put(name, null);
   }
 
+
   void define(String name, Object value) {
     assertNotDefined(name);
     values.put(name, value);
     initializedVariables.add(name);
+  }
+
+  Environment ancestor(int distance) {
+    Environment environment = this;
+    for (int i = 0; i < distance; i++) {
+      environment = environment.enclosing;
+    }
+
+    return environment;
+  }
+
+  Object getAt(int distance, String name) {
+    return ancestor(distance).values.get(name);
+  }
+
+  void assignAt(int distance, Token name, Object value) {
+    ancestor(distance).values.put(name.lexeme, value);
   }
 
   Object get(Token name) {
