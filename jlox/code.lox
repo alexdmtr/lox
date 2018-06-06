@@ -50,14 +50,14 @@ fun main() {
 }
 
 class Person {
+    init(name) {
+        this.name = name;
+    }
     hello() {
         print "Hi, I'm " + this.name;
     }
 }
 
-var alex = Person();
-alex.name = "Alex";
+var alex = Person("Alex Dumitru");
 
-var hello = alex.hello;
-
-hello();
+alex.hello();
