@@ -49,27 +49,15 @@ fun main() {
     }
 }
 
-class Point {
-    toString() {
-        return "Point("+this.x+","+this.y+")";
-    }
-
-    translate(other) {
-        var newPoint = Point();
-        newPoint.x = this.x + other.x;
-        newPoint.y = this.y + other.y;
-
-        return newPoint;
+class Person {
+    hello() {
+        print "Hi, I'm " + this.name;
     }
 }
 
-var p = Point();
-p.x = 2;
-p.y = 3;
+var alex = Person();
+alex.name = "Alex";
 
-var t = Point();
-t.x = 1;
-t.y = 2;
+var hello = alex.hello;
 
-p = p.translate(t);
-print p.toString();
+hello();
