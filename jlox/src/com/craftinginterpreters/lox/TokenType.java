@@ -6,6 +6,8 @@ enum TokenType {
   COMMA, DOT, MINUS, PLUS, SEMICOLON, SLASH, STAR,
   PERCENT,
 
+  LEFT_SQUARE_BRACKET, RIGHT_SQUARE_BRACKET,
+
   // One or two character tokens.
   BANG, BANG_EQUAL,
   EQUAL, EQUAL_EQUAL,

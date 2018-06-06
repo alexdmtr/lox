@@ -12,6 +12,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
   private final Map<Expr, Integer> locals = new HashMap<>();
 
   Interpreter() {
+    globals.define("NEWLINE_CHAR", "\n");
     globals.define("clock", new LoxCallable() {
       @Override
       public int arity() {
@@ -26,6 +27,8 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     });
 
     java.util.Scanner scanner = new java.util.Scanner(System.in);
+    java.util.Scanner charScanner = new java.util.Scanner(System.in);
+    charScanner.useDelimiter("");
 
     globals.define("readDouble", new LoxCallable() {
       @Override
@@ -66,6 +69,21 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
       @Override
       public Object call(Interpreter interpreter, List<Object> arguments) {
         String value = scanner.nextLine();
+
+        return value;
+      }
+    });
+
+    globals.define("readByte", new LoxCallable() {
+
+      @Override
+      public int arity() {
+        return 0;
+      }
+
+      @Override
+      public Object call(Interpreter interpreter, List<Object> arguments) {
+        String value = charScanner.next();
 
         return value;
       }
@@ -112,6 +130,14 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
   }
 
   @Override
+  public Void visitClassStmt(Stmt.Class stmt) {
+    environment.define(stmt.name.lexeme, null);
+    LoxClass klass = new LoxClass(stmt.name.lexeme);
+    environment.assign(stmt.name, klass);
+    return null;
+  }
+
+  @Override
   public Object visitFunctionExpr(Expr.Function expr) {
     LoxFunction function = new LoxFunction(expr, environment);
     if (function.kind == LoxFunction.Kind.NAMED) {
@@ -142,6 +168,19 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     }
 
     return evaluate(expr.right);
+  }
+
+  @Override
+  public Object visitSetExpr(Expr.Set expr) {
+    Object object = evaluate(expr.object);
+
+    if (!(object instanceof LoxInstance)) {
+      throw new RuntimeError(expr.name, "Only instances have fields.");
+    }
+
+    Object value = evaluate(expr.value);
+    ((LoxInstance)object).set(expr.name, value);
+    return value;
   }
 
   @Override
@@ -266,6 +305,17 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     return function.call(this, arguments);
   }
 
+  @Override
+  public Object visitGetExpr(Expr.Get expr) {
+    Object object = evaluate(expr.object);
+    if (object instanceof LoxInstance) {
+      return ((LoxInstance) object).get(expr.name);
+    }
+
+    throw new RuntimeError(expr.name,
+        "Only instances have properties.");
+  }
+
   // This is added by me, so we can compare strings lexicographically.
   private int compare(Expr.Binary expr, Object left, Object right) {
     if (left instanceof Double && right instanceof Double)
@@ -282,7 +332,9 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     if (a == null && b == null) return true;
     if (a == null) return false;
 
-    return a.equals(b);
+    boolean result = a.equals(b);
+
+    return result;
   }
 
   String stringify(Object object) {

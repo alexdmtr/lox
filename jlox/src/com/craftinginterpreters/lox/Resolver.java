@@ -39,6 +39,14 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
   }
 
   @Override
+  public Void visitClassStmt(Stmt.Class stmt) {
+    declare(stmt.name);
+    define(stmt.name);
+    return null;
+  }
+
+
+  @Override
   public Void visitContinueStmt(Stmt.Continue stmt) {
     if (currentLoop == LoopType.NONE)
       Lox.error(stmt.name, "Cannot continue from outside a loop.");
@@ -136,6 +144,13 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
   }
 
   @Override
+  public Void visitGetExpr(Expr.Get expr) {
+    resolve(expr.object);
+    return null;
+  }
+
+
+  @Override
   public Void visitFunctionExpr(Expr.Function expr) {
     if (expr.kind == LoxFunction.Kind.NAMED) {
       declare(expr.name);
@@ -162,6 +177,13 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
   public Void visitLogicalExpr(Expr.Logical expr) {
     resolve(expr.left);
     resolve(expr.right);
+    return null;
+  }
+
+  @Override
+  public Void visitSetExpr(Expr.Set expr) {
+    resolve(expr.value);
+    resolve(expr.object);
     return null;
   }
 

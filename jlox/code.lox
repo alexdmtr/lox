@@ -1,17 +1,55 @@
-fun counter() {
-    var i = 0;
+var byte;
+var lastByte = "";
 
-    return fun() {
-        i = i + 1;
-        return i;
-    };
+fun nextSymbol(callback) {
+    var byte = readByte();
+
+    if (byte == nil or byte == NEWLINE_CHAR)
+        return false;
+    callback(byte);
+
+    lastByte = byte;
+    return true;
 }
 
-var count = counter();
-
-for (; ;) {
-    var x = count();
-    print x;
-    if (x >= 5)
-        break;
+fun hasNextLine() {
+    return lastByte != nil;
 }
+
+fun resolveAutomaton(transition, predicate) {
+    var length = 0;
+    while (nextSymbol(transition))
+        length = length + 1;
+
+    if (predicate())
+        print "Accepted";
+    else
+        print "Refused";
+    return length;
+}
+
+fun main() {
+    while (hasNextLine()) {
+        var alpha = 0;
+        var beta = 0;
+
+        var transition = fun(symbol) {
+            if (symbol == "a")
+                alpha = alpha+1;
+            if (symbol == "c")
+                beta = beta+1;
+        };
+
+        var predicate = fun() {
+            return (alpha - beta) % 3 == 0;
+        };
+
+        resolveAutomaton(transition, predicate);
+
+    }
+}
+
+class Bagel {}
+var bagel = Bagel();
+bagel.name = "Alex";
+print bagel.name; // Prints "Bagel instance".
