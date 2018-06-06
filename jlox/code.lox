@@ -49,7 +49,10 @@ fun main() {
     }
 }
 
-class Bagel {}
-var bagel = Bagel();
-bagel.name = "Alex";
-print bagel.name; // Prints "Bagel instance".
+class Bacon {
+  eat() {
+    print "Crunch crunch crunch!";
+  }
+}
+
+Bacon().eat(); // Prints "Crunch crunch crunch!".
