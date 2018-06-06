@@ -7,8 +7,10 @@ class LoxFunction implements LoxCallable {
     final List<Token> parameters;
     final List<Stmt> body;
     final String name;
+    final Kind kind;
 
-    Declaration(String name, List<Token> parameters, List<Stmt> body) {
+    Declaration(Kind kind, String name, List<Token> parameters, List<Stmt> body) {
+      this.kind = kind;
       this.name = name;
       this.parameters = parameters;
       this.body = body;
@@ -18,20 +20,29 @@ class LoxFunction implements LoxCallable {
     NAMED, ANONYMOUS
   }
 
-  final Kind kind;
   private final Declaration declaration;
   private final Environment closure;
   LoxFunction(Stmt.Function declaration, Environment closure) {
-    this.declaration = new Declaration(declaration.name.lexeme, declaration.parameters, declaration.body);
+    this.declaration = new Declaration(Kind.NAMED, declaration.name.lexeme, declaration.parameters, declaration.body);
     this.closure = closure;
-    this.kind = Kind.NAMED;
   }
 
   // Overload for receiving function expressions (anonymous methods)
   LoxFunction(Expr.Function declaration, Environment closure) {
-    this.kind = declaration.kind;
-    this.declaration = new Declaration(kind != Kind.ANONYMOUS ? declaration.name.lexeme : "", declaration.parameters, declaration.body);
+    this.declaration = new Declaration(declaration.kind, declaration.kind != Kind.ANONYMOUS ? declaration.name.lexeme : "", declaration.parameters, declaration.body);
     this.closure = closure;
+  }
+
+  // Private overload for receiving a declaration object
+  private LoxFunction(Declaration declaration, Environment closure) {
+    this.declaration = declaration;
+    this.closure = closure;
+  }
+
+  LoxFunction bind(LoxInstance instance) {
+    Environment environment = new Environment(closure);
+    environment.define("this", instance);
+    return new LoxFunction(declaration, environment);
   }
 
   @Override
@@ -59,5 +70,9 @@ class LoxFunction implements LoxCallable {
   @Override
   public String toString() {
     return "<fn " + declaration.name + ">";
+  }
+
+  public Kind getKind() {
+    return this.declaration.kind;
   }
 }

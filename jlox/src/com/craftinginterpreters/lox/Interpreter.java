@@ -147,7 +147,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
   @Override
   public Object visitFunctionExpr(Expr.Function expr) {
     LoxFunction function = new LoxFunction(expr, environment);
-    if (function.kind == LoxFunction.Kind.NAMED) {
+    if (function.getKind() == LoxFunction.Kind.NAMED) {
       try {
       environment.define(expr.name.lexeme, function);
     } catch (Environment.RedefineVariableError variableError) {
@@ -188,6 +188,11 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     Object value = evaluate(expr.value);
     ((LoxInstance)object).set(expr.name, value);
     return value;
+  }
+
+  @Override
+  public Object visitThisExpr(Expr.This expr) {
+    return lookUpVariable(expr.keyword, expr);
   }
 
   @Override
