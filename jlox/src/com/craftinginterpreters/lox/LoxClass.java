@@ -27,7 +27,11 @@ class LoxClass extends LoxInstance implements LoxCallable {
     this.name = name;
     this.methods = methods;
     this.superclass = superclass;
-    this.klass = new LoxClass(name + " (metaclass)" ,staticMethods);
+    this.klass = new LoxClass(name + " (metaclass)" , staticMethods);
+
+    // Create NOOP initializer, if otherwise there's none.
+    if (!methods.containsKey("init"))
+      methods.put("init", LoxFunction.getNOOP(true));
   }
 
   LoxFunction findMethod(LoxInstance instance, String name) {

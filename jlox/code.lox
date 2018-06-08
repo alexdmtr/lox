@@ -11,4 +11,10 @@ class B < A {
     }
 }
 
+class C < B {
+    init() {
+        super.init();
+    }
+}
+
 C().act();

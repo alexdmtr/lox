@@ -1,5 +1,6 @@
 package com.craftinginterpreters.lox;
 
+import java.util.ArrayList;
 import java.util.List;
 
 class LoxFunction implements LoxCallable {
@@ -23,6 +24,7 @@ class LoxFunction implements LoxCallable {
   private final Declaration declaration;
   private final Environment closure;
   private final boolean isInitializer;
+
   LoxFunction(Stmt.Function declaration, Environment closure, boolean isInitializer) {
     this.declaration = new Declaration(Kind.NAMED, declaration.name.lexeme, declaration.parameters, declaration.body);
     this.closure = closure;
@@ -41,6 +43,12 @@ class LoxFunction implements LoxCallable {
     this.declaration = declaration;
     this.closure = closure;
     this.isInitializer = isInitializer;
+  }
+
+  static LoxFunction getNOOP(boolean isInitializer) {
+    return new LoxFunction(new Declaration(Kind.NAMED, "",
+        new ArrayList<>(), new ArrayList<>()),
+        new Environment(), isInitializer);
   }
 
   LoxFunction bind(LoxInstance instance) {
