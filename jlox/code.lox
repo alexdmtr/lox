@@ -1,13 +1,18 @@
-class Doughnut {
-  cook() {
-    print "Fry until golden brown.";
-  }
-
-  init() {
-    print "init";
-  }
+class A {
+    act() {
+        print "A";
+    }
 }
 
-class BostonCream < Doughnut {}
+class B < A {
+    act() {
+        super.act();
+        print "B";
+    }
+}
 
-BostonCream().cook();
+class C < B {
+
+}
+
+C().act();
