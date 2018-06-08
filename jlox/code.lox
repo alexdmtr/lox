@@ -50,14 +50,23 @@ fun main() {
 }
 
 class Person {
+
+    static init() {
+        Person.peopleCount = 0;
+    }
+
+    static addNew(person) {
+        Person.peopleCount = Person.peopleCount + 1;
+        print person.name + " #" + Person.peopleCount;
+    }
+
     init(name) {
         this.name = name;
+        Person.addNew(this);
     }
-    hello() {
-        print "Hi, I'm " + this.name;
-    }
+
+
 }
 
 var alex = Person("Alex Dumitru");
-
-alex.hello();
+var otherAlex = Person("Alex Ghita");

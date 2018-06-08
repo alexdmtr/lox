@@ -26,6 +26,13 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     CLASS
   }
 
+  private enum FunctionContext {
+    DYNAMIC,
+    STATIC
+  }
+
+  private FunctionContext currentContext = FunctionContext.DYNAMIC;
+
   private ClassType currentClass = ClassType.NONE;
 
   Resolver(Interpreter interpreter) {
@@ -62,7 +69,14 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
       if (method.name.lexeme.equals("init")) {
         declaration = FunctionType.INITIALIZER;
       }
-      resolveFunction(method, declaration);
+      resolveFunction(method, declaration, FunctionContext.DYNAMIC);
+    }
+    for (Stmt.Function method : stmt.staticMethods) {
+      FunctionType declaration = FunctionType.METHOD;
+      if (method.name.lexeme.equals("init")) {
+        declaration = FunctionType.INITIALIZER;
+      }
+      resolveFunction(method, declaration, FunctionContext.STATIC);
     }
 
     endScope();
@@ -91,7 +105,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     declare(stmt.name);
     define(stmt.name);
 
-    resolveFunction(stmt, FunctionType.FUNCTION);
+    resolveFunction(stmt, FunctionType.FUNCTION, FunctionContext.STATIC);
     return null;
   }
 
@@ -188,7 +202,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
       define(expr.name);
     }
 
-    resolveFunction(expr, FunctionType.FUNCTION);
+    resolveFunction(expr, FunctionType.FUNCTION, FunctionContext.STATIC);
     return null;
   }
 
@@ -225,6 +239,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
           "Cannot use 'this' outside of a class.");
       return null;
     }
+    if (currentContext == FunctionContext.STATIC)
+      Lox.error(expr.keyword,
+          "Cannot use 'this' in a static context.");
 
     resolveLocal(expr, expr.keyword);
     return null;
@@ -262,18 +279,30 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     expr.accept(this);
   }
 
-  private void resolveFunction(Object function, FunctionType type) {
+  private void resolveFunction(Object function, FunctionType type, FunctionContext context) {
     FunctionType enclosingFunction = currentFunction;
     currentFunction = type;
+    FunctionContext enclosingContext = currentContext;
+    currentContext = context;
     List<Token> parameters;
     List<Stmt> body;
+
 
     if (function instanceof Stmt.Function) {
       parameters = ((Stmt.Function) function).parameters;
       body = ((Stmt.Function) function).body;
+
+
+      if (currentFunction == FunctionType.INITIALIZER && currentContext == FunctionContext.STATIC
+          && parameters.size() > 0)
+        Lox.error(((Stmt.Function) function).name, "Static initializers cannot have parameters.");
     } else if (function instanceof Expr.Function) {
       parameters = ((Expr.Function) function).parameters;
       body = ((Expr.Function) function).body;
+
+      if (currentFunction == FunctionType.INITIALIZER && currentContext == FunctionContext.STATIC
+          && parameters.size() > 0)
+        Lox.error(((Expr.Function) function).name, "Static initializers cannot have parameters.");
     } else {
       parameters = new ArrayList<>();
       body = new ArrayList<>();
@@ -288,10 +317,11 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     endScope();
 
     currentFunction = enclosingFunction;
+    currentContext = enclosingContext;
   }
 
   private void beginScope() {
-    scopes.push(new HashMap<String, Boolean>());
+    scopes.push(new HashMap<>());
   }
 
   private void endScope() {

@@ -1,15 +1,30 @@
 package com.craftinginterpreters.lox;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class LoxClass implements LoxCallable {
+class LoxClass extends LoxInstance implements LoxCallable {
   final String name;
   private final Map<String, LoxFunction> methods;
+  private final static LoxClass MetaClass;
 
-  LoxClass(String name, Map<String, LoxFunction> methods) {
+  static {
+    MetaClass = new LoxClass("MetaClass", new HashMap<>());
+  }
+
+  // Only used for meta classes.
+  private LoxClass(String name, Map<String, LoxFunction> staticMethods) {
+    super(null);
+    this.name = name;
+    this.methods = staticMethods;
+  }
+
+  LoxClass(String name, Map<String, LoxFunction> methods, Map<String, LoxFunction> staticMethods) {
+    super(MetaClass);
     this.name = name;
     this.methods = methods;
+    this.klass = new LoxClass(name + " (metaclass)" ,staticMethods);
   }
 
   LoxFunction findMethod(LoxInstance instance, String name) {
@@ -18,6 +33,11 @@ class LoxClass implements LoxCallable {
     }
 
     return null;
+  }
+
+  LoxFunction findStaticMethod(String name) {
+    LoxClass metaClass = klass;
+    return metaClass.findMethod(this, name);
   }
 
   @Override
