@@ -1,0 +1,134 @@
+var byte;
+var lastByte = "";
+
+fun nextSymbol(callback) {
+    var byte = readByte();
+
+    if (byte == nil or byte == NEWLINE_CHAR)
+        return false;
+    callback(byte);
+
+    lastByte = byte;
+    return true;
+}
+
+fun hasNextLine() {
+    return lastByte != nil;
+}
+
+fun resolveAutomaton(transition, predicate) {
+    var length = 0;
+    while (nextSymbol(transition))
+        length = length + 1;
+
+    if (predicate())
+        print "Accepted";
+    else
+        print "Refused";
+    return length;
+}
+
+fun main() {
+    while (hasNextLine()) {
+        var alpha = 0;
+        var beta = 0;
+
+        var transition = fun(symbol) {
+            if (symbol == "a")
+                alpha = alpha+1;
+            if (symbol == "c")
+                beta = beta+1;
+        };
+
+        var predicate = fun() {
+            return (alpha - beta) % 3 == 0;
+        };
+
+        resolveAutomaton(transition, predicate);
+
+    }
+}
+
+class Person {
+
+    static init() {
+        Person.peopleCount = 0;
+    }
+
+    static addNew(person) {
+        Person.peopleCount = Person.peopleCount + 1;
+        print person.getName() + " #" + Person.peopleCount;
+    }
+
+    init(firstName, lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        Person.addNew(this);
+    }
+
+    getName() {
+        return this.firstName + " " + this.lastName;
+    }
+}
+
+class Node {
+    init(val) {
+        this.val = val;
+        this.left = nil;
+        this.right = nil;
+    }
+
+    add(newVal) {
+        if (newVal <= this.val) {
+            if (this.left)
+                this.left.add(newVal);
+            else
+                this.left = Node(newVal);
+        } else {
+            if (this.right)
+                this.right.add(newVal);
+            else
+                this.right = Node(newVal);
+        }
+    }
+
+    walk(callback) {
+        if (this.left) this.left.walk(callback);
+        callback(this);
+        if (this.right) this.right.walk(callback);
+    }
+}
+
+class Tree {
+    init() {
+        this.root = nil;
+    }
+
+    add(newVal) {
+        if (this.root == nil)
+            this.root = Node(newVal);
+        else
+            this.root.add(newVal);
+    }
+
+    walk(callback) {
+        if (this.root)
+            this.root.walk(callback);
+    }
+
+    printOrdered() {
+        this.walk(fun(node) {
+            print node.val;
+        });
+    }
+}
+
+var tree = Tree();
+tree.add(4);
+tree.add(20);
+tree.add(1);
+tree.add(3);
+tree.add(50);
+tree.add(7);
+
+tree.printOrdered();

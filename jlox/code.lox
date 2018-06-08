@@ -1,72 +1,13 @@
-var byte;
-var lastByte = "";
+class Doughnut {
+  cook() {
+    print "Fry until golden brown.";
+  }
 
-fun nextSymbol(callback) {
-    var byte = readByte();
-
-    if (byte == nil or byte == NEWLINE_CHAR)
-        return false;
-    callback(byte);
-
-    lastByte = byte;
-    return true;
+  init() {
+    print "init";
+  }
 }
 
-fun hasNextLine() {
-    return lastByte != nil;
-}
+class BostonCream < Doughnut {}
 
-fun resolveAutomaton(transition, predicate) {
-    var length = 0;
-    while (nextSymbol(transition))
-        length = length + 1;
-
-    if (predicate())
-        print "Accepted";
-    else
-        print "Refused";
-    return length;
-}
-
-fun main() {
-    while (hasNextLine()) {
-        var alpha = 0;
-        var beta = 0;
-
-        var transition = fun(symbol) {
-            if (symbol == "a")
-                alpha = alpha+1;
-            if (symbol == "c")
-                beta = beta+1;
-        };
-
-        var predicate = fun() {
-            return (alpha - beta) % 3 == 0;
-        };
-
-        resolveAutomaton(transition, predicate);
-
-    }
-}
-
-class Person {
-
-    static init() {
-        Person.peopleCount = 0;
-    }
-
-    static addNew(person) {
-        Person.peopleCount = Person.peopleCount + 1;
-        print person.name + " #" + Person.peopleCount;
-    }
-
-    init(name) {
-        this.name = name;
-        Person.addNew(this);
-    }
-
-
-}
-
-var alex = Person("Alex Dumitru");
-var otherAlex = Person("Alex Ghita");
+BostonCream().cook();
