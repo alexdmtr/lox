@@ -31,4 +31,18 @@ class LoxInstance {
   public String toString() {
     return klass.name + " instance";
   }
+
+  public boolean isInstanceOf(LoxClass classType) {
+    LoxClass klass = this.klass;
+
+    // Go up the inheritance chain.
+    while (klass != null) {
+      if (klass == classType)
+        return true;
+
+      klass = klass.superclass;
+    }
+
+    return false;
+  }
 }

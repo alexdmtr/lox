@@ -328,6 +328,12 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
         return compare(expr, left, right) < 0;
       case LESS_EQUAL:
         return compare(expr, left, right) <= 0;
+      case INSTANCEOF:
+        if (!(right instanceof LoxClass))
+          throw new RuntimeError(expr.operator, "Right operand must be a class type.");
+        if (!(left instanceof LoxInstance))
+          throw new RuntimeError(expr.operator, "Left operand must be a class instance.");
+        return (((LoxInstance) left).isInstanceOf((LoxClass) right));
       case BANG_EQUAL: return !isEqual(left, right);
       case EQUAL_EQUAL: return isEqual(left, right);
 

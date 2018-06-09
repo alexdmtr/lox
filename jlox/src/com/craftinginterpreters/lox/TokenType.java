@@ -23,6 +23,7 @@ enum TokenType {
 
   BREAK, CONTINUE,
   STATIC,
+  INSTANCEOF,
 
   EOF
 }

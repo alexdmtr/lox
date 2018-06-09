@@ -300,11 +300,11 @@ class Parser {
     return expr;
   }
 
-  // comparison → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
+  // comparison → addition ( ( ">" | ">=" | "<" | "<=" | "instanceof" ) addition )* ;
   private Expr comparison() {
     Expr expr = addition();
 
-    while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
+    while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL, INSTANCEOF)) {
       Token operator = previous();
       Expr right = addition();
       expr = new Expr.Binary(expr, operator, right);

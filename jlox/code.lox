@@ -1,20 +1,30 @@
 class A {
-    act() {
+    init() {
         print "A";
+    }
+    static hey() {
+        print "I'm A";
     }
 }
 
 class B < A {
-    act() {
-        super.act();
+    init() {
+        super.init();
         print "B";
     }
 }
 
-class C < B {
+class C < A {
+
+}
+
+class D < B {
     init() {
         super.init();
     }
 }
 
-C().act();
+var d = D();
+print d instanceof A;
+print d instanceof B;
+print d instanceof C;
