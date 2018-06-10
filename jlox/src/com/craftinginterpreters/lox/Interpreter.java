@@ -1,9 +1,6 @@
 package com.craftinginterpreters.lox;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 // This class is modified so that statements *do* return values
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
@@ -88,6 +85,21 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
         return value;
       }
     });
+
+    Random random = new Random();
+    globals.define("randInt", new LoxCallable() {
+      @Override
+      public Object call(Interpreter interpreter, List<Object> arguments) {
+        return Double.valueOf(random.nextInt());
+      }
+
+      @Override
+      public int arity() {
+        return 0;
+      }
+    });
+
+    globals.define("HashMap", new LoxHashMap());
   }
 
   List<Object> interpret(List<Stmt> statements) {
@@ -164,7 +176,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     environment.assign(stmt.name, klass);
 
     // Run static initializer on class load.
-    LoxFunction staticInitializer = klass.findStaticMethod("init");
+    LoxCallable staticInitializer = klass.findStaticMethod("init");
     if (staticInitializer != null)
       staticInitializer.call(this, new ArrayList<>());
     return null;
@@ -226,7 +238,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Object> {
     LoxInstance object = (LoxInstance)environment.getAt(
         distance - 1, "this");
 
-    LoxFunction method = superclass.findMethod(
+    LoxCallable method = superclass.findMethod(
         object, expr.method.lexeme);
 
     if (method == null) {

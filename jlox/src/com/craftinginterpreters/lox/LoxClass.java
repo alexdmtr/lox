@@ -34,7 +34,7 @@ class LoxClass extends LoxInstance implements LoxCallable {
       methods.put("init", LoxFunction.getNOOP(true));
   }
 
-  LoxFunction findMethod(LoxInstance instance, String name) {
+  LoxCallable findMethod(LoxInstance instance, String name) {
     if (methods.containsKey(name)) {
       return methods.get(name).bind(instance);
     }
@@ -46,7 +46,7 @@ class LoxClass extends LoxInstance implements LoxCallable {
     return null;
   }
 
-  LoxFunction findStaticMethod(String name) {
+  LoxCallable findStaticMethod(String name) {
     LoxClass metaClass = klass;
     return metaClass.findMethod(this, name);
   }

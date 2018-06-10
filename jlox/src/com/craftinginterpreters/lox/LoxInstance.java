@@ -16,16 +16,29 @@ class LoxInstance {
       return fields.get(name.lexeme);
     }
 
-    LoxFunction method = klass.findMethod(this, name.lexeme);
+    LoxCallable method = klass.findMethod(this, name.lexeme);
     if (method != null) return method;
 
     throw new RuntimeError(name,
         "Undefined property '" + name.lexeme + "'.");
   }
 
+  Object get(String name) {
+    if (fields.containsKey(name)) {
+      return fields.get(name);
+    }
+
+    LoxCallable method = klass.findMethod(this, name);
+    if (method != null) return method;
+
+    throw new RuntimeError(null,
+        "Undefined property '" + name + "'.");
+  }
+
   void set(Token name, Object value) {
     fields.put(name.lexeme, value);
   }
+  void set(String name, Object value) { fields.put(name, value); }
 
   @Override
   public String toString() {
